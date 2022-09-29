@@ -58,15 +58,17 @@ pipeline {
             branch "main"
         }
       steps {
-        sh "mvn verify"
+        sh "mvn package -Dskip.unit-tests=true"
       }
     }
 
     stage('Build and unit test'){
         when {
-                branch "feature/*"
-            }
-
+            anyOf{
+                branch 'feature/*'
+                branch 'release/*'
+            } 
+        }
         steps{
             configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
                 sh "mvn package"
@@ -79,7 +81,6 @@ pipeline {
         when {
             anyOf {
                 branch 'main'
-                branch 'release/*'
                 allOf {
                     environment name: 'E2E_TEST', value: 'true'
                     branch 'feature/*'
@@ -100,8 +101,7 @@ pipeline {
             anyOf{
                 branch 'main'
                 branch 'release/*'
-            }
-           
+            }  
         }
         steps {
             configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
@@ -123,8 +123,6 @@ pipeline {
 
 
     }
-
-
 
     
     }
