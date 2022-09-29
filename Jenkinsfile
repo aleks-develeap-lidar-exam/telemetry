@@ -5,9 +5,13 @@ pipeline {
         timeout(activity: true, time: 5)
     }
     
-  agent any
+    tools {
+        jdk 'jdk8'
+        maven '3.8.2'
+    }
+    agent any
 
-  stages {
+    stages {
  
     stage('Build') {
       steps {
