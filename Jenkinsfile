@@ -91,7 +91,7 @@ pipeline {
             echo "E2E tests here"
             ///comment for tessting
             withCredentials([usernamePassword(credentialsId: 'aleks_jfrog', passwordVariable: 'password', usernameVariable: 'myUser')]) {
-                sh "curl -u $myUser:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/"
+                sh "curl -u $myUser:$password http://18.157.158.168:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/simulator-99-20220929.101554-1.jar"
             }        
         }   
 
