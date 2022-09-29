@@ -13,7 +13,7 @@ pipeline {
 
     stages {
 
-    stage("Print env variables for debbuging") {
+    stage("Set E2E flag") {
             steps {
                 script{
                     GIT_MESSAGE = sh (
@@ -25,7 +25,6 @@ pipeline {
                         
                     }
                 }
-                sh "printenv"
 
             }
         }
@@ -89,12 +88,22 @@ pipeline {
         } 
         steps{
             echo "E2E tests here"
-            ///comment for tessting
+            sh "mkdir test"
             withCredentials([usernamePassword(credentialsId: 'aleks_jfrog', passwordVariable: 'password', usernameVariable: 'myUser')]) {
-                sh "curl -u $myUser\:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/"
+                sh "curl -u $myUser:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/simulator-99-20220929.101554-1.jar --output test/simulator.jar"
+                sh "curl -u $myUser:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/analytics/99-SNAPSHOT/analytics-99-20220929.100647-1.jar --output test/analytics.jar"
+        
             }
-            
-        }  
+            withCredentials([string(credentialsId: 'testing_api', variable: 'token')]) {
+                sh "curl --header 'PRIVATE-TOKEN: $token' http://gitlab/api/v4/projects/8/repository/files/tests-sanity.txt/raw?ref=main --output test/tests.txt"
+            }
+            sh "cp target/telemetry-99-SNAPSHOT.jar test/telemetry.jar"
+            dir('test'){
+                sh "java -cp simulator.jar:analytics.jar:telemetry.jar com.lidar.simulation.Simulator"
+            }
+            sh "rm -r test"
+        
+        }   
 
     }
  
