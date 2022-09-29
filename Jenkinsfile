@@ -10,7 +10,14 @@ pipeline {
         maven '3.6.2'
     }
     agent any
-
+    
+    triggers {
+        gitlab(
+            triggerOnPush: true,
+            branchFilterType: 'All'
+        )
+    }
+    
     stages {
 
     stage("Set E2E flag") {
