@@ -15,7 +15,18 @@ pipeline {
 
     stage("Print env variables for debbuging") {
             steps {
+                script{
+                    GIT_MESSAGE = sh (
+                    script: "git log --format=%B -n 1 $GIT_COMMIT",
+                    returnStdout: true
+                    ).trim()
+                    if ("${GIT_MESSAGE}".contains('#e2e')){
+                        env.E2E_TEST = true
+                        
+                    }
+                }
                 sh "printenv"
+
             }
         }
 
@@ -25,22 +36,29 @@ pipeline {
             }
 
         steps{
-            script {
-                configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
-                    sh "mvn package"
+            configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
+                sh "mvn package"
             }
-            env.GIT_MESSAGE = sh (
-                script: "git log --format=%B -n 1 $GIT_COMMIT",
-                returnStdout: true
-                ).trim()
-            if ("${GIT_MESSAGE}".contains('#e2e')){
-                echo "e2e tests here"
-                //comment for tests
-            }
-            }
+    
+        }
+        }
+    
+    stage('E2E test'){
+        when {
+            anyOf {
+                branch 'main'
+                branch 'release/*'
+                allOf {
+                    environment name: 'ENV_TEST', value: 'true'
+                    branch 'feature/*'
+                }
+            }     
+        } 
+        steps{
+            echo "E2E tests here"
+        }  
 
-        }
-        }
+    }
  
     stage('Build') {
       steps {
