@@ -27,6 +27,7 @@ pipeline {
         steps{
             configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
             sh "mvn package"
+            sh "git log --format=%B -n 1 $GIT_COMMIT"
             }
         }
         }
