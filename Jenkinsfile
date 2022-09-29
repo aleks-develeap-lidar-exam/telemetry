@@ -96,10 +96,10 @@ pipeline {
                 sh "curl -u $myUser:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/analytics/99-SNAPSHOT/analytics-99-20220929.100647-1.jar --output test/analytics.jar"
         
             }
-            sh "curl http://gitlab/api/v4/exam/testing/-/raw/main/tests-sanity.txt --output test/tests.txt"
+            sh "curl http://gitlab/api/v4/projects/8/repository/files/tests-sanity.txt/raw?ref=main --output test/tests.txt"
             sh "cp target/telemetry-99-SNAPSHOT.jar test/telemetry.jar"
             sh "cd test"
-            sh "java -cp simulator.jar com.lidar.simulation.Simulator"
+            sh "java -cp simulator.jar:analytics.jar:telemetry.jar com.lidar.simulation.Simulator"
             sh "cd .."
             sh "rm -r test"
         
