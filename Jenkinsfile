@@ -90,8 +90,10 @@ pipeline {
         steps{
             echo "E2E tests here"
             ///comment for tessting
-            sh "curl http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/"
-        }  
+            withCredentials([usernamePassword(credentialsId: 'aleks_jfrog', passwordVariable: 'password', usernameVariable: 'myUser')]) {
+                sh "curl -u $myUser\:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/"
+            }        
+        }   
 
     }
  
