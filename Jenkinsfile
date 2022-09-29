@@ -49,7 +49,7 @@ pipeline {
                 branch 'main'
                 branch 'release/*'
                 allOf {
-                    environment name: 'ENV_TEST', value: 'true'
+                    environment name: 'E2E_TEST', value: 'true'
                     branch 'feature/*'
                 }
             }     
