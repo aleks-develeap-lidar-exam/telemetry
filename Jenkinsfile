@@ -10,10 +10,17 @@ pipeline {
         maven '3.6.2'
     }
     agent any
-
+    
+    triggers {
+        gitlab(
+            triggerOnPush: true,
+            branchFilterType: 'All'
+        )
+    }
+    
     stages {
 
-    stage("Print env variables for debbuging") {
+    stage("Set E2E flag") {
             steps {
                 script{
                     GIT_MESSAGE = sh (
@@ -25,7 +32,6 @@ pipeline {
                         
                     }
                 }
-                sh "printenv"
 
             }
         }
@@ -88,9 +94,7 @@ pipeline {
             }     
         } 
         steps{
-            echo "E2E tests here"
             sh "mkdir test"
-            ///comment for tessting
             withCredentials([usernamePassword(credentialsId: 'aleks_jfrog', passwordVariable: 'password', usernameVariable: 'myUser')]) {
                 sh "curl -u $myUser:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/simulator-99-20220929.101554-1.jar --output test/simulator.jar"
                 sh "curl -u $myUser:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/analytics/99-SNAPSHOT/analytics-99-20220929.100647-1.jar --output test/analytics.jar"
