@@ -99,7 +99,7 @@ pipeline {
             sh "curl http://gitlab/api/v4/exam/testing/-/raw/main/tests-sanity.txt --output test/tests.txt"
             sh "cp target/telemetry-99-SNAPSHOT.jar test/telemetry.jar"
             sh "cd test"
-            sh "java -cp simulator.jar:analytics.jar:telemetry.jar Simulator"
+            sh "java -cp simulator.jar:analytics.jar:telemetry.jar com.lidar.simulation.Simulator"
             sh "cd .."
             sh "rm -r test"
         
