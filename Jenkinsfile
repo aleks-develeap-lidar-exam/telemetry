@@ -96,7 +96,8 @@ pipeline {
                 sh "curl -u $myUser:$password http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/analytics/99-SNAPSHOT/analytics-99-20220929.100647-1.jar --output test/analytics.jar"
         
             }
-            sh "curl --header 'http://gitlab/api/v4/exam/testing/-/raw/main/tests-sanity.txt --output test/tests.txt'"
+            sh "curl http://gitlab/api/v4/exam/testing/-/raw/main/tests-sanity.txt --output test/tests.txt'"
+            sh "rm -r test"
         
         }   
 
