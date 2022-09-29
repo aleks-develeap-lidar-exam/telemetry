@@ -35,6 +35,7 @@ pipeline {
                 ).trim()
             if ("${GIT_MESSAGE}".contains('#e2e')){
                 echo "e2e tests here"
+                //comment for tests
             }
             }
 
