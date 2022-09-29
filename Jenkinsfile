@@ -25,9 +25,17 @@ pipeline {
             }
 
         steps{
-            configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
-            sh "mvn package"
-            sh "git log --format=%B -n 1 $GIT_COMMIT"
+            script {
+                configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
+                    sh "mvn package"
+            }
+            env.GIT_MESSAGE = sh (
+                script: "git log --format=%B -n 1 $GIT_COMMIT",
+                returnStdout: true
+                ).trim()
+            }
+            if ("${GIT_MESSAGE}".contains('#e2e')){
+                echo "e2e tests here"
             }
         }
         }
@@ -39,6 +47,9 @@ pipeline {
     }
 
     stage('Publish') {
+        when {
+            branch "main"
+        }
         steps {
             configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
             sh "mvn deploy -s $SETTINGS -Dmaven.test.skip"
