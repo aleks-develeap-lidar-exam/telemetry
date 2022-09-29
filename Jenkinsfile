@@ -30,6 +30,29 @@ pipeline {
             }
         }
 
+    stage('Calculate version'){
+        when {
+                branch "release/*"
+            }
+        steps {
+            script {
+            branchNumber = env.BRANCH_NAME.split("/")[1]
+            sh "git fetch --tags"
+            oldTag = sh(script: "git describe --tags --abbrev=0 || true", returnStdout: true).trim()
+            if (!oldTag) {
+                        finalNum = "0"
+                    } else {
+                        finalNum = (oldTag.tokenize(".")[2].toInteger() + 1).toString()
+                    }
+
+                    env.VERSION = branchNumber + "." + finalNum
+                    echo env.VERSION
+                    sh "mvn versions:set -DnewVersion=$env.VERSION"
+            }
+        }
+    }
+
+
     stage('Build') {
         when {
             branch "main"
@@ -74,7 +97,11 @@ pipeline {
 
     stage('Publish') {
         when {
-            branch "main"
+            anyOf{
+                branch 'main'
+                branch 'release/*'
+            }
+           
         }
         steps {
             configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
@@ -82,7 +109,24 @@ pipeline {
             }
         }
     }
+        stage('Tag'){
+        when {
+                branch "release/*"
+            }
+        steps{
+            script{
+                    sh "git clean -f -x"
+                    sh "git tag -a ${env.VERSION} -m 'version ${env.VERSION}'"
+                    sh "git push --tag"
+            }
+        }
 
+
+    }
+
+
+
+    
     }
 }
 
