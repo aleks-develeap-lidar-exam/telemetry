@@ -33,10 +33,11 @@ pipeline {
                 script: "git log --format=%B -n 1 $GIT_COMMIT",
                 returnStdout: true
                 ).trim()
-            }
             if ("${GIT_MESSAGE}".contains('#e2e')){
                 echo "e2e tests here"
             }
+            }
+
         }
         }
  
