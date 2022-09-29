@@ -12,6 +12,24 @@ pipeline {
     agent any
 
     stages {
+
+    stage("Print env variables for debbuging") {
+            steps {
+                sh "printenv"
+            }
+        }
+
+    stage('Feature test'){
+        when {
+                branch "feature/*"
+            }
+
+        steps{
+            configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
+            sh "mvn package"
+            }
+        }
+        }
  
     stage('Build') {
       steps {
