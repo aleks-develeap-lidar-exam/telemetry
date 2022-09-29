@@ -30,11 +30,45 @@ pipeline {
             }
         }
 
-    stage('Feature test'){
+    stage('Calculate version'){
         when {
-                branch "feature/*"
+                branch "release/*"
             }
+        steps {
+            script {
+            branchNumber = env.BRANCH_NAME.split("/")[1]
+            sh "git fetch --tags"
+            oldTag = sh(script: "git describe --tags --abbrev=0 || true", returnStdout: true).trim()
+            if (!oldTag) {
+                        finalNum = "0"
+                    } else {
+                        finalNum = (oldTag.tokenize(".")[2].toInteger() + 1).toString()
+                    }
 
+                    env.VERSION = branchNumber + "." + finalNum
+                    echo env.VERSION
+                    sh "mvn versions:set -DnewVersion=$env.VERSION"
+            }
+        }
+    }
+
+
+    stage('Build') {
+        when {
+            branch "main"
+        }
+      steps {
+        sh "mvn package -Dskip.unit-tests=true"
+      }
+    }
+
+    stage('Build and unit test'){
+        when {
+            anyOf{
+                branch 'feature/*'
+                branch 'release/*'
+            } 
+        }
         steps{
             configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
                 sh "mvn package"
@@ -47,7 +81,6 @@ pipeline {
         when {
             anyOf {
                 branch 'main'
-                branch 'release/*'
                 allOf {
                     environment name: 'E2E_TEST', value: 'true'
                     branch 'feature/*'
@@ -57,19 +90,19 @@ pipeline {
         steps{
             echo "E2E tests here"
             ///comment for tessting
+            sh "curl http://artifactory:8082/artifactory/exam-libs-snapshot-local/com/lidar/simulator/99-SNAPSHOT/"
         }  
 
     }
  
-    stage('Build') {
-      steps {
-        sh "mvn verify"
-      }
-    }
+
 
     stage('Publish') {
         when {
-            branch "main"
+            anyOf{
+                branch 'main'
+                branch 'release/*'
+            }  
         }
         steps {
             configFileProvider([configFile(fileId: 'exam_maven_settings', variable: 'SETTINGS')]) {
@@ -77,7 +110,22 @@ pipeline {
             }
         }
     }
+        stage('Tag'){
+        when {
+                branch "release/*"
+            }
+        steps{
+            script{
+                    sh "git clean -f -x"
+                    sh "git tag -a ${env.VERSION} -m 'version ${env.VERSION}'"
+                    sh "git push --tag"
+            }
+        }
 
+
+    }
+
+    
     }
 }
 
