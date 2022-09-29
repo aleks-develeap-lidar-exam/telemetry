@@ -30,7 +30,16 @@ pipeline {
             }
         }
 
-    stage('Feature test'){
+    stage('Build') {
+        when {
+            branch "main"
+        }
+      steps {
+        sh "mvn verify"
+      }
+    }
+
+    stage('Build and unit test'){
         when {
                 branch "feature/*"
             }
@@ -61,11 +70,7 @@ pipeline {
 
     }
  
-    stage('Build') {
-      steps {
-        sh "mvn verify"
-      }
-    }
+
 
     stage('Publish') {
         when {
